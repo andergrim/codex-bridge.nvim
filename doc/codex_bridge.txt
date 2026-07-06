@@ -12,8 +12,9 @@ COMMANDS                                              *codex_bridge-commands*
         Start the app-server without opening the external terminal.
 
                                                   *:CodexStartResumeSession*
-:CodexStartResumeSession {thread_id}
-        Start the app-server and resume a known Codex thread id.
+:CodexStartResumeSession {session_id}
+        Start the app-server, resume a known Codex session/thread id, and open
+        the terminal with `codex resume --remote ...`.
 
                                                               *:CodexSend*
 :[range]CodexSend [prompt]

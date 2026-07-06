@@ -1,13 +1,12 @@
 # codex-bridge.nvim
 
-Neovim plugin prototype for sending the current file or selection to a
+Neovim plugin for sending the current file or selection to a
 plugin-owned Codex app-server session.
 
 ## Requirements
 
 - Neovim 0.12 or newer
 - `codex` on `$PATH`
-- A supported external terminal for the companion Codex TUI
 
 ## Setup
 
@@ -29,7 +28,8 @@ require("codex_bridge").setup({
 - `:CodexStartSession` starts `codex app-server --listen unix://...` and opens
   a terminal running `codex --remote unix://...`.
 - `:CodexStartSession!` starts the app-server without opening a terminal.
-- `:CodexStartResumeSession {thread_id}` resumes a known Codex thread id.
+- `:CodexStartResumeSession {session_id}` resumes a known Codex session/thread
+  id and opens the terminal with `codex resume --remote ...`.
 - `:CodexSend {prompt}` sends the current file or visual selection with a
   prompt.
 - `:CodexStopSession` stops the plugin-owned app-server.
@@ -48,7 +48,7 @@ Override the command explicitly:
 ```lua
 require("codex_bridge").setup({
   terminal = {
-    command = { "your-terminal", "-e" },
+    command = { "alacritty", "-e" },
   },
 })
 ```
@@ -131,7 +131,7 @@ local function codex_status()
   if state.status == "stopped" then
     return ""
   end
-  return state.busy and "Codex: busy" or "Codex: " .. state.status
+  return state.busy and "  busy" or "  " .. state.status
 end
 
 require("lualine").setup({
@@ -147,6 +147,11 @@ require("lualine").setup({
 ```
 
 ## Notes
+
+If `which-key.nvim` is installed, `codex-bridge.nvim` registers the configured
+keymap prefix as a `Codex` group so the prefix is labelled in the popup. This is
+only a small metadata injection; the actual mappings are still regular Neovim
+keymaps with `desc` fields, and `which-key` is not required.
 
 The plugin uses Codex's Unix socket app-server transport, which is WebSocket
 over a local Unix socket. The Codex app-server protocol is still evolving, so
