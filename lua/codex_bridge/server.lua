@@ -51,7 +51,7 @@ local function wait_for_socket(path, timeout_ms, callback)
   end)
 end
 
-local function launch_terminal(path)
+local function launch_terminal(path, resume_id)
   local cfg = config.get()
   if not cfg.terminal.enabled then
     return nil
@@ -63,7 +63,11 @@ local function launch_terminal(path)
     return nil
   end
 
-  vim.list_extend(cmd, { cfg.codex_cmd, "--remote", remote_url(path) })
+  if resume_id and resume_id ~= "" then
+    vim.list_extend(cmd, { cfg.codex_cmd, "resume", "--remote", remote_url(path), resume_id })
+  else
+    vim.list_extend(cmd, { cfg.codex_cmd, "--remote", remote_url(path) })
+  end
 
   local job_id = vim.fn.jobstart(cmd, { detach = true })
   if job_id <= 0 then
@@ -189,7 +193,7 @@ function M.start(opts)
   local current = state.get()
   if current.status ~= "stopped" and current.status ~= "error" then
     if opts.open_terminal ~= false and current.socket_path then
-      launch_terminal(current.socket_path)
+      launch_terminal(current.socket_path, opts.resume_id)
     end
     return
   end
@@ -253,7 +257,7 @@ function M.start(opts)
     initialize_rpc(path, function()
       start_thread({ resume_id = opts.resume_id })
       if opts.open_terminal ~= false then
-        launch_terminal(path)
+        launch_terminal(path, opts.resume_id)
       end
     end)
   end)
